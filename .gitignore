@@ -5,13 +5,12 @@ dist/
 
 *.log
 
-# Environment files
-*.local
+# Husky (auto-generated on install)
+.husky/
+
+# Environment
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+!.env.example
 
 # Docker
 .dockerignore
@@ -35,3 +34,16 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# ESLint
+.eslintcache
+
+# Benchmark results (keep .gitkeep)
+benchmark/results/*.json
+!benchmark/results/.gitkeep
+
+# Vitest coverage
+coverage/
+
+# environment variables
+.env

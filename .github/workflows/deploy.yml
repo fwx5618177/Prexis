@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  # Build 完成后自动触发
+  repository_dispatch:
+    types: [deploy]
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        type: choice
+        options:
+          - test
+          - pre
+          - prod
+      image:
+        description: '镜像地址 (如 ghcr.io/owner/repo:v1.0.0)'
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || github.event.client_payload.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || github.event.client_payload.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set variables
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "image=${{ github.event.inputs.image }}" >> $GITHUB_OUTPUT
+          else
+            echo "environment=${{ github.event.client_payload.environment }}" >> $GITHUB_OUTPUT
+            echo "image=${{ github.event.client_payload.image }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create .env file
+        run: echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Deploy
+        run: |
+          echo "🚀 Deploying to ${{ steps.vars.outputs.environment }}"
+          echo "Image: ${{ steps.vars.outputs.image }}"
+          #
+          # SSH 部署:
+          # ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          #   "docker pull ${{ steps.vars.outputs.image }} && \
+          #    cd /app && docker compose up -d"
+          #
+          # Kubernetes:
+          # kubectl set image deployment/prexis prexis=${{ steps.vars.outputs.image }}

@@ -1,18 +1,17 @@
 {
-    "restartable": "rs",
-    "verbose": true,
-    "watch": [
-        "src",
-        ".env",
-        "package.json",
-        "tsconfig.json"
-    ],
-    "ignore": [
-      "src/**/*.{spec,test}.ts",
-      "src/logs/*"
-    ],
-    "delay": "1000",
-    "exec": "ts-node -r tsconfig-paths/register --transpile-only src/server.ts",
-    "ext": "ts,ejs,yml,json,js"
+  "restartable": "rs",
+  "verbose": true,
+  "watch": [
+    "src",
+    ".env",
+    "package.json",
+    "tsconfig.json"
+  ],
+  "ignore": [
+    "src/**/*.{spec,test}.ts",
+    "src/logs/*"
+  ],
+  "delay": "1000",
+  "exec": "ts-node -r tsconfig-paths/register --transpile-only src/server.ts",
+  "ext": "ts,ejs,yml,json,js"
 }
-  

@@ -1,0 +1,52 @@
+# Prexis 健康检查测试
+# 测试服务器健康状态和基础端点
+
+@baseURL = http://localhost:3000
+
+###
+# 健康检查 - 主端点
+# @name healthCheck
+GET {{baseURL}}/health
+
+###
+# 健康检查 - 验证响应格式
+# 期望响应:
+# {
+#   "status": "healthy",
+#   "timestamp": "2025-xx-xxTxx:xx:xx.xxxZ",
+#   "uptime": <number>,
+#   "version": "1.0.0"
+# }
+GET {{baseURL}}/health
+Accept: application/json
+
+###
+# Swagger API 文档
+# @name swaggerDocs
+GET {{baseURL}}/api-docs/
+
+###
+# Swagger JSON Schema
+GET {{baseURL}}/api-docs/swagger-ui-init.js
+
+###
+# Apollo GraphQL Playground
+# @name graphqlPlayground
+GET {{baseURL}}/graphql
+Accept: text/html
+
+###
+# 测试 CORS 预检请求
+OPTIONS {{baseURL}}/health
+Origin: http://example.com
+Access-Control-Request-Method: GET
+
+###
+# 测试压缩响应
+GET {{baseURL}}/health
+Accept-Encoding: gzip, deflate, br
+
+###
+# 测试 JSON 响应头
+GET {{baseURL}}/health
+Accept: application/json

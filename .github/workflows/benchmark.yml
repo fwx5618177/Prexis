@@ -1,0 +1,84 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: Performance Benchmark
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Start server
+        run: |
+          node dist/server.js &
+          echo "Waiting for server to start..."
+          sleep 5
+          curl -s http://localhost:3000/health || exit 1
+          echo "Server is ready"
+
+      - name: Run benchmark
+        run: |
+          npx autocannon -c 50 -d 10 -j http://localhost:3000/health > benchmark-result.json
+
+      - name: Generate report
+        run: |
+          echo "## 🚀 Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Requests/sec | $(jq '.requests.average' benchmark-result.json) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Latency avg | $(jq '.latency.average' benchmark-result.json)ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Latency p50 | $(jq '.latency.p50' benchmark-result.json)ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Latency p99 | $(jq '.latency.p99' benchmark-result.json)ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Throughput | $(jq '.throughput.average' benchmark-result.json) bytes/sec |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check performance threshold
+        run: |
+          RPS=$(jq '.requests.average' benchmark-result.json)
+          P99=$(jq '.latency.p99' benchmark-result.json)
+          echo "RPS: $RPS, P99: ${P99}ms"
+
+          # RPS 阈值检查
+          if (( $(echo "$RPS < 3000" | bc -l) )); then
+            echo "❌ Performance regression: RPS ($RPS) below threshold (3000)"
+            exit 1
+          fi
+
+          # P99 延迟检查
+          if (( $(echo "$P99 > 100" | bc -l) )); then
+            echo "⚠️ Warning: P99 latency (${P99}ms) exceeds 100ms"
+          fi
+
+          echo "✅ Performance check passed!"
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark-result.json
+          retention-days: 30

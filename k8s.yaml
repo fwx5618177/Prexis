@@ -1,0 +1,171 @@
+# Prexis Kubernetes 部署配置
+# 支持蓝绿发布和金丝雀发布
+# 部署前通过 kubectl create secret/configmap 注入环境变量
+
+---
+# 配置（部署时用 Kustomize/Helm 管理，或 kubectl create configmap）
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prexis-config
+data: {}
+  # NODE_ENV: "prod"
+  # LOG_FORMAT: "combined"
+
+---
+# 敏感配置（部署时用 kubectl create secret 创建）
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prexis-secrets
+type: Opaque
+stringData: {}
+  # DATABASE_URL: "mysql://..."
+  # SECRET_KEY: "..."
+
+---
+# 主 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prexis
+  labels:
+    app: prexis
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prexis
+  template:
+    metadata:
+      labels:
+        app: prexis
+        version: stable
+    spec:
+      containers:
+        - name: prexis
+          image: prexis:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: prexis-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: prexis-secrets
+                  key: database-url
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+---
+# 金丝雀 Deployment（默认关闭）
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prexis-canary
+  labels:
+    app: prexis
+    version: canary
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: prexis
+      version: canary
+  template:
+    metadata:
+      labels:
+        app: prexis
+        version: canary
+    spec:
+      containers:
+        - name: prexis
+          image: prexis:canary
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: prexis-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: prexis-secrets
+                  key: database-url
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prexis
+spec:
+  selector:
+    app: prexis
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prexis
+spec:
+  rules:
+    - host: api.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prexis
+                port:
+                  number: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: prexis-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: prexis
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

@@ -1,34 +1,136 @@
-# baseURL
+# Prexis 用户管理接口测试
+# 测试用户 CRUD 操作
+
 @baseURL = http://localhost:3000
 
-###
-# Find All Users
-GET {{ baseURL }}/users
+# 测试数据
+@testEmail = crud-test@prexis.dev
+@testPassword = CrudTest123!
+@updateEmail = updated@prexis.dev
+@updatePassword = Updated123!
 
 ###
-# Find User By Id
-GET {{ baseURL }}/users/1
+# ==================== 查询用户 ====================
+
+# 1. 获取所有用户
+# @name getAllUsers
+GET {{baseURL}}/users
 
 ###
-# Create User
-POST {{ baseURL }}/users
+# 2. 获取单个用户（ID=1）
+# @name getUserById
+GET {{baseURL}}/users/1
+
+###
+# 3. 获取用户 - 不存在的 ID
+GET {{baseURL}}/users/99999
+
+###
+# 4. 获取用户 - 无效 ID 格式
+GET {{baseURL}}/users/invalid-id
+
+###
+# ==================== 创建用户 ====================
+
+# 5. 创建新用户
+# @name createUser
+POST {{baseURL}}/users
 Content-Type: application/json
 
 {
-    "email": "example@email.com",
-	"password": "password"
+    "email": "{{testEmail}}",
+    "password": "{{testPassword}}"
 }
 
 ###
-# Modify User By Id
-PUT {{ baseURL }}/users/1
+# 6. 创建用户 - 邮箱已存在
+POST {{baseURL}}/users
 Content-Type: application/json
 
 {
-    "email": "example@email.com",
-	"password": "password"
+    "email": "{{testEmail}}",
+    "password": "{{testPassword}}"
 }
 
 ###
-# Delete User By Id
-DELETE {{ baseURL }}/users/1
+# 7. 创建用户 - 缺少必填字段
+POST {{baseURL}}/users
+Content-Type: application/json
+
+{
+    "email": "incomplete@test.com"
+}
+
+###
+# 8. 创建用户 - 空请求体
+POST {{baseURL}}/users
+Content-Type: application/json
+
+{}
+
+###
+# ==================== 更新用户 ====================
+
+# 9. 更新用户信息
+# @name updateUser
+PUT {{baseURL}}/users/1
+Content-Type: application/json
+
+{
+    "email": "{{updateEmail}}",
+    "password": "{{updatePassword}}"
+}
+
+###
+# 10. 更新用户 - 仅更新邮箱
+PUT {{baseURL}}/users/1
+Content-Type: application/json
+
+{
+    "email": "partial-update@test.com",
+    "password": "{{testPassword}}"
+}
+
+###
+# 11. 更新用户 - 不存在的用户
+PUT {{baseURL}}/users/99999
+Content-Type: application/json
+
+{
+    "email": "nonexistent@test.com",
+    "password": "{{testPassword}}"
+}
+
+###
+# 12. 更新用户 - 无效请求体
+PUT {{baseURL}}/users/1
+Content-Type: application/json
+
+{
+    "invalid": "data"
+}
+
+###
+# ==================== 删除用户 ====================
+
+# 13. 删除用户
+# @name deleteUser
+DELETE {{baseURL}}/users/1
+
+###
+# 14. 删除用户 - 不存在的用户
+DELETE {{baseURL}}/users/99999
+
+###
+# 15. 删除用户 - 无效 ID
+DELETE {{baseURL}}/users/invalid
+
+###
+# ==================== 分页和筛选（如果支持） ====================
+
+# 16. 分页查询
+GET {{baseURL}}/users?page=1&limit=10
+
+###
+# 17. 排序查询
+GET {{baseURL}}/users?sort=email&order=asc

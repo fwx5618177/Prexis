@@ -1,56 +1,50 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "lib": [
-      "DOM",
-      "ES2017",
-      "esnext.asynciterable"
-    ],
-    "jsx": "preserve",
-    "experimentalDecorators": true,
+    // 编译目标
+    "target": "ES2022",
     "module": "CommonJS",
-    "rootDir": "./",
+    "lib": ["ES2022"],
     "moduleResolution": "node",
+
+    // 路径配置
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
       "@config": ["config"],
-      "@middlewares/*": ["middlewares/*"],
-      "@utils/*": ["utils/*"],
-      "@exceptions/*": ["exceptions/*"],
       "@types": ["types"],
+      "@modules/*": ["modules/*"],
       "@shared/*": ["shared/*"],
-      "@modules/*": ["modules/*"]
+      "@services/*": ["services/*"],
+      "@protocols/*": ["protocols/*"]
     },
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "sourceMap": true,
     "outDir": "./dist",
-    "noEmit": true,
-    "isolatedModules": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./",
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "skipDefaultLibCheck": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
+    // 模块互操作
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // 装饰器支持 (class-validator 需要)
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // 输出控制
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": false,
+
+    // 其他
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": [
-    "./**/*",
-    "src/**/*.ts",
-    "src/**/*.json",
-    ".env"
-  ],
-  "exclude": [
-    "./dist",
-    "node_modules/**/*",
-    "http",
-    "logs",
-    "tests"
-  ]
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist", "logs"]
 }

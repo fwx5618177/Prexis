@@ -1,18 +1,37 @@
-# compiled output
-.vscode
-/node_modules
+# ============================================
+# Docker 构建忽略文件
+# ============================================
 
-# code formatter
-.eslintrc
-.eslintignore
-.editorconfig
-.huskyrc
-.lintstagedrc.json
-.prettierrc
+# 依赖
+node_modules/
+.pnpm-store/
 
-# test
-jest.config.js
+# 构建产物
+dist/
+*.log
 
-# docker
-Dockerfile
-docker-compose.yml
+# 开发文件
+.git/
+.github/
+.husky/
+.vscode/
+.idea/
+
+# 测试
+http/
+*.http
+
+# 环境配置
+.env
+.env.*
+!.env.example
+
+# 文档
+docs/
+*.md
+!README.md
+
+# Docker 相关（避免递归）
+docker-compose*.yml
+Dockerfile*
+k8s/

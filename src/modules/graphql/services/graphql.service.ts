@@ -1,94 +1,94 @@
 import { CreatePostBlog, Post, UpdatePostBlog } from '../dtos/graphql.dto'
 import { HttpException } from '@/exceptions/HttpException'
 import { isEmpty } from '@/utils/util'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/prisma/client'
 
 class GraphqlService {
-    public blog = new PrismaClient().blog
+  public blog = prisma.blog
 
-    public async getPostById(postId: string): Promise<Post> {
-        if (!postId) throw new HttpException(400, 'Not blog:' + postId)
+  public async getPostById(postId: string): Promise<Post> {
+    if (!postId) throw new HttpException(400, 'Not blog:' + postId)
 
-        const listPosts: Post = (await this.blog.findFirst({
-            where: {
-                id: postId,
-            },
-        })) as Post
+    const listPosts: Post = (await this.blog.findFirst({
+      where: {
+        id: postId,
+      },
+    })) as Post
 
-        if (!listPosts) throw new HttpException(409, `${postId} not found`)
+    if (!listPosts) throw new HttpException(409, `${postId} not found`)
 
-        return listPosts
-    }
+    return listPosts
+  }
 
-    public async createPost(post: CreatePostBlog): Promise<Post> {
-        if (isEmpty(post)) throw new HttpException(400, "That's not blog data:" + post.id)
+  public async createPost(post: CreatePostBlog): Promise<Post> {
+    if (isEmpty(post)) throw new HttpException(400, "That's not blog data:" + post.id)
 
-        const findBlog: Post = (await this.blog.findUnique({
-            where: {
-                id: post.id,
-            },
-        })) as Post
+    const findBlog: Post = (await this.blog.findUnique({
+      where: {
+        id: post.id,
+      },
+    })) as Post
 
-        if (findBlog) throw new HttpException(409, `Id ${post.id} already exists`)
+    if (findBlog) throw new HttpException(409, `Id ${post.id} already exists`)
 
-        const createData: Post = await this.blog.create({
-            data: {
-                ...post,
-            },
-        })
+    const createData: Post = await this.blog.create({
+      data: {
+        ...post,
+      },
+    })
 
-        return createData
-    }
+    return createData
+  }
 
-    public async updatePost(post: UpdatePostBlog): Promise<Post> {
-        if (isEmpty(post)) throw new HttpException(400, "That's not blog data:" + post.id)
-        const findBlog: Post = (await this.blog.findUnique({
-            where: {
-                id: post.id,
-            },
-        })) as Post
+  public async updatePost(post: UpdatePostBlog): Promise<Post> {
+    if (isEmpty(post)) throw new HttpException(400, "That's not blog data:" + post.id)
+    const findBlog: Post = (await this.blog.findUnique({
+      where: {
+        id: post.id,
+      },
+    })) as Post
 
-        if (!findBlog) throw new HttpException(409, 'Not Blog:' + post.id)
+    if (!findBlog) throw new HttpException(409, 'Not Blog:' + post.id)
 
-        const updatePost: Post = await this.blog.update({
-            where: {
-                id: post.id,
-            },
-            data: {
-                ...post,
-            },
-        })
+    const updatePost: Post = await this.blog.update({
+      where: {
+        id: post.id,
+      },
+      data: {
+        ...post,
+      },
+    })
 
-        return updatePost
-    }
+    return updatePost
+  }
 
-    public async deletePost(postId: string): Promise<Post> {
-        if (!postId) throw new HttpException(400, 'Not blog:' + postId)
+  public async deletePost(postId: string): Promise<Post> {
+    if (!postId) throw new HttpException(400, 'Not blog:' + postId)
 
-        const findBlog: Post = (await this.blog.findUniqueOrThrow({
-            where: {
-                id: postId,
-            },
-        })) as Post
+    const findBlog: Post = (await this.blog.findUniqueOrThrow({
+      where: {
+        id: postId,
+      },
+    })) as Post
 
-        if (!findBlog) throw new HttpException(409, 'Not blog:' + postId)
+    if (!findBlog) throw new HttpException(409, 'Not blog:' + postId)
 
-        const deletePost: Post = await this.blog.delete({
-            where: {
-                id: postId,
-            },
-        })
+    const deletePost: Post = await this.blog.delete({
+      where: {
+        id: postId,
+      },
+    })
 
-        return deletePost
-    }
+    return deletePost
+  }
 
-    public async listPosts(): Promise<Post[]> {
-        const findBlog: Post[] = (await this.blog.findMany({})) as Post[]
+  public async listPosts(): Promise<Post[]> {
+    const findBlog: Post[] = (await this.blog.findMany({})) as Post[]
 
-        if (!findBlog) throw new HttpException(409, 'No data')
+    if (!findBlog) throw new HttpException(409, 'No data')
 
-        return findBlog
-    }
+    return findBlog
+  }
 }
 
 export default GraphqlService

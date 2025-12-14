@@ -1,0 +1,97 @@
+# Prexis 完整功能测试
+# 按顺序测试完整的用户流程
+
+@baseURL = http://localhost:3000
+
+# 动态变量（每次运行生成新值）
+@uniqueEmail = user_{{$timestamp}}@prexis.dev
+@testPassword = TestPass123!
+
+###
+# ==================== 第一步：服务健康检查 ====================
+
+# 1. 检查服务是否正常运行
+# @name healthCheck
+GET {{baseURL}}/health
+
+###
+# ==================== 第二步：用户注册 ====================
+
+# 2. 注册新用户
+# @name registerUser
+POST {{baseURL}}/signup
+Content-Type: application/json
+
+{
+    "email": "{{uniqueEmail}}",
+    "password": "{{testPassword}}"
+}
+
+###
+# ==================== 第三步：用户登录 ====================
+
+# 3. 使用注册的账号登录
+# @name loginUser
+POST {{baseURL}}/login
+Content-Type: application/json
+
+{
+    "email": "{{uniqueEmail}}",
+    "password": "{{testPassword}}"
+}
+
+###
+# ==================== 第四步：获取用户信息 ====================
+
+# 4. 获取所有用户（验证新用户已创建）
+# @name getUsers
+GET {{baseURL}}/users
+
+###
+# ==================== 第五步：GraphQL 操作 ====================
+
+# 5. GraphQL - 获取文章列表（Mock）
+# @name graphqlListPosts
+POST {{baseURL}}/graphql/mock
+Content-Type: application/json
+
+{
+    "query": "{ listPosts { id title content } }"
+}
+
+###
+# 6. GraphQL - 创建文章（Mock）
+# @name graphqlCreatePost
+POST {{baseURL}}/graphql/mock
+Content-Type: application/json
+
+{
+    "query": "mutation { createPost(post: { title: \"测试文章\", content: \"这是测试内容\" }) { id title content } }"
+}
+
+###
+# ==================== 第六步：用户登出 ====================
+
+# 7. 登出用户
+# @name logoutUser
+POST {{baseURL}}/logout
+Content-Type: application/json
+Cookie: {{loginUser.response.headers.Set-Cookie}}
+
+###
+# ==================== API 文档验证 ====================
+
+# 8. 访问 Swagger UI
+GET {{baseURL}}/api-docs/
+
+###
+# ==================== 总结 ====================
+# 完整流程测试：
+# 1. ✅ 健康检查
+# 2. ✅ 用户注册
+# 3. ✅ 用户登录
+# 4. ✅ 获取用户列表
+# 5. ✅ GraphQL 查询
+# 6. ✅ GraphQL 变更
+# 7. ✅ 用户登出
+# 8. ✅ API 文档

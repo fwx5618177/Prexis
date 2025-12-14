@@ -1,0 +1,125 @@
+# Prexis 错误场景测试
+# 测试各种错误情况的处理
+
+@baseURL = http://localhost:3000
+
+###
+# ==================== 404 错误 ====================
+
+# 1. 不存在的路由
+GET {{baseURL}}/non-existent-route
+
+###
+# 2. 不存在的嵌套路由
+GET {{baseURL}}/api/v1/unknown
+
+###
+# 3. 不存在的用户
+GET {{baseURL}}/users/99999999
+
+###
+# ==================== 400 错误 - 请求验证 ====================
+
+# 4. 无效的 JSON 格式
+POST {{baseURL}}/signup
+Content-Type: application/json
+
+{ invalid json }
+
+###
+# 5. 缺少 Content-Type
+POST {{baseURL}}/signup
+
+{"email": "test@test.com", "password": "test123"}
+
+###
+# 6. 空请求体
+POST {{baseURL}}/signup
+Content-Type: application/json
+
+###
+# 7. 无效的邮箱格式
+POST {{baseURL}}/signup
+Content-Type: application/json
+
+{
+    "email": "not-an-email",
+    "password": "test123456"
+}
+
+###
+# ==================== 401 错误 - 认证 ====================
+
+# 8. 无认证信息访问保护路由
+POST {{baseURL}}/logout
+Content-Type: application/json
+
+###
+# 9. 无效的 Bearer Token
+POST {{baseURL}}/logout
+Content-Type: application/json
+Authorization: Bearer invalid.token.here
+
+###
+# 10. 过期的 Token（模拟）
+POST {{baseURL}}/logout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNjAwMDAwMDAwfQ.invalid
+
+###
+# ==================== 405 错误 - 方法不允许 ====================
+
+# 11. 使用不支持的 HTTP 方法
+PATCH {{baseURL}}/users/1
+Content-Type: application/json
+
+{
+    "email": "test@test.com"
+}
+
+###
+# 12. DELETE 在不支持的路由
+DELETE {{baseURL}}/health
+
+###
+# ==================== 413 错误 - 请求体过大 ====================
+
+# 13. 超大请求体（可能会被拒绝）
+POST {{baseURL}}/signup
+Content-Type: application/json
+
+{
+    "email": "test@test.com",
+    "password": "test123456",
+    "extra_data": "{{$randomLoremParagraphs 100}}"
+}
+
+###
+# ==================== 特殊字符处理 ====================
+
+# 14. URL 中的特殊字符
+GET {{baseURL}}/users/<script>alert('xss')</script>
+
+###
+# 15. SQL 注入尝试（应该被安全处理）
+GET {{baseURL}}/users/1' OR '1'='1
+
+###
+# 16. 路径遍历尝试
+GET {{baseURL}}/../../etc/passwd
+
+###
+# ==================== 并发和超时 ====================
+
+# 17. 超长 URL
+GET {{baseURL}}/users?id=1&name=test&email=test@test.com&password=test123456&extra=data&more=params&even=more&and=more&params=here&to=test&long=urls
+
+###
+# 18. Unicode 字符
+POST {{baseURL}}/signup
+Content-Type: application/json
+
+{
+    "email": "测试@测试.中国",
+    "password": "密码123456"
+}
