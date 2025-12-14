@@ -84,6 +84,72 @@ pnpm lint             # Lint
 pnpm typecheck        # Type check
 ```
 
+## 🛠️ CLI Tool
+
+Prexis includes a CLI for rapid module generation and project cleanup.
+
+### Generate Module
+
+```bash
+# Generate a new API module (dto, service, controller, route)
+pnpm gen <module-name>
+
+# Examples
+pnpm gen product          # Creates src/modules/product/
+pnpm gen user-profile     # Creates src/modules/user-profile/
+pnpm gen order-item       # Creates src/modules/order-item/
+```
+
+**Generated structure:**
+```
+src/modules/<module-name>/
+├── index.ts
+├── dtos/
+│   └── <module-name>.dto.ts
+├── services/
+│   └── <module-name>.service.ts
+├── controllers/
+│   └── <module-name>.controller.ts
+└── routes/
+    └── <module-name>.route.ts
+```
+
+**Options:**
+```bash
+pnpm gen product --no-dto         # Skip DTO generation
+pnpm gen product --no-service     # Skip Service generation
+pnpm gen product --no-controller  # Skip Controller generation
+pnpm gen product --no-route       # Skip Route generation
+```
+
+### Clean Examples
+
+Remove example modules (users, graphql) for production use:
+
+```bash
+pnpm clean:examples       # Interactive confirmation
+pnpm clean:examples -y    # Skip confirmation
+```
+
+### List Modules
+
+```bash
+pnpm cli:list             # List all existing modules
+```
+
+### After Generation
+
+Register your new route in `src/routes.ts`:
+
+```typescript
+import { ProductRoute } from '@modules/product'
+
+const routes: Routes[] = [
+  // ... existing routes
+  new ProductRoute(),
+]
+```
+
 ## 🌐 API
 
 | Endpoint | Description |

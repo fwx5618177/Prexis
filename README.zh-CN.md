@@ -84,6 +84,72 @@ pnpm lint             # 代码检查
 pnpm typecheck        # 类型检查
 ```
 
+## 🛠️ CLI 工具
+
+Prexis 内置 CLI 工具，用于快速生成模块和清理项目。
+
+### 生成模块
+
+```bash
+# 生成新的 API 模块 (dto, service, controller, route)
+pnpm gen <模块名>
+
+# 示例
+pnpm gen product          # 创建 src/modules/product/
+pnpm gen user-profile     # 创建 src/modules/user-profile/
+pnpm gen order-item       # 创建 src/modules/order-item/
+```
+
+**生成结构：**
+```
+src/modules/<模块名>/
+├── index.ts
+├── dtos/
+│   └── <模块名>.dto.ts
+├── services/
+│   └── <模块名>.service.ts
+├── controllers/
+│   └── <模块名>.controller.ts
+└── routes/
+    └── <模块名>.route.ts
+```
+
+**可选参数：**
+```bash
+pnpm gen product --no-dto         # 不生成 DTO
+pnpm gen product --no-service     # 不生成 Service
+pnpm gen product --no-controller  # 不生成 Controller
+pnpm gen product --no-route       # 不生成 Route
+```
+
+### 清理示例模块
+
+删除示例模块（users、graphql），准备生产使用：
+
+```bash
+pnpm clean:examples       # 交互式确认
+pnpm clean:examples -y    # 跳过确认
+```
+
+### 列出模块
+
+```bash
+pnpm cli:list             # 列出所有现有模块
+```
+
+### 生成后操作
+
+在 `src/routes.ts` 中注册新路由：
+
+```typescript
+import { ProductRoute } from '@modules/product'
+
+const routes: Routes[] = [
+  // ... 现有路由
+  new ProductRoute(),
+]
+```
+
 ## 🌐 API 端点
 
 | 端点 | 说明 |

@@ -46,7 +46,12 @@
     "test:coverage": "vitest run --coverage",
     "certs:generate": "tsx src/scripts/generate-certs.ts",
     "prepare": "husky",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "gen": "tsx cli/index.ts generate",
+    "gen:module": "tsx cli/index.ts generate",
+    "clean:examples": "tsx cli/index.ts clean",
+    "cli": "tsx cli/index.ts",
+    "cli:list": "tsx cli/index.ts list"
   },
   "prisma": {
     "schema": "prisma/schema.prisma"
