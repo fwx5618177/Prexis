@@ -24,7 +24,7 @@ describe('Config', () => {
       delete process.env.PORT
       const config = await import('@/config')
 
-      expect(config.PORT).toBe('3000')
+      expect(config.PORT).toBe(3000)
     })
   })
 

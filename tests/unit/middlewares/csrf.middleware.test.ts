@@ -29,6 +29,7 @@ describe('CSRF Middleware', () => {
     beforeEach(() => {
       vi.doMock('@/config', () => ({
         CSRF_ENABLED: false,
+        isProd: () => false,
       }))
     })
 
@@ -48,6 +49,7 @@ describe('CSRF Middleware', () => {
     beforeEach(() => {
       vi.doMock('@/config', () => ({
         CSRF_ENABLED: true,
+        isProd: () => false,
       }))
     })
 
@@ -178,6 +180,7 @@ describe('CSRF Middleware', () => {
     beforeEach(() => {
       vi.doMock('@/config', () => ({
         CSRF_ENABLED: true,
+        isProd: () => false,
       }))
     })
 

@@ -43,14 +43,34 @@ paths:
       tags:
         - Health
       summary: Readiness check
-      description: Returns the readiness status for Kubernetes probes
+      description: Returns the readiness status for Kubernetes probes. Protected by Circuit Breaker for database health checks.
       responses:
         '200':
           description: Application is ready
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthResponse'
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Application is not ready (database unavailable or circuit open)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+  /circuit-breaker/status:
+    get:
+      tags:
+        - Health
+      summary: Circuit Breaker status
+      description: Returns the status of all circuit breakers in the application
+      responses:
+        '200':
+          description: Circuit breaker status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircuitBreakerStatus'
 
   /api/auth/register:
     post:
@@ -282,6 +302,85 @@ components:
         version:
           type: string
           example: 1.0.0
+
+    ReadinessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          example: healthy
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+          example: 3600
+        version:
+          type: string
+          example: 1.0.0
+        checks:
+          type: object
+          properties:
+            database:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [up, down]
+                  example: up
+                latency:
+                  type: number
+                  example: 5
+                circuitBreaker:
+                  type: string
+                  enum: [CLOSED, OPEN, HALF_OPEN]
+                  example: CLOSED
+
+    CircuitBreakerStatus:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 1
+          description: Number of circuit breakers
+        breakers:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: database-health
+              state:
+                type: string
+                enum: [CLOSED, OPEN, HALF_OPEN]
+                example: CLOSED
+                description: "CLOSED: normal, OPEN: failing fast, HALF_OPEN: testing recovery"
+              isOpen:
+                type: boolean
+                example: false
+              stats:
+                type: object
+                properties:
+                  successes:
+                    type: integer
+                    example: 150
+                  failures:
+                    type: integer
+                    example: 2
+                  rejects:
+                    type: integer
+                    example: 0
+                  timeouts:
+                    type: integer
+                    example: 0
+                  fallbacks:
+                    type: integer
+                    example: 0
+                  successRate:
+                    type: number
+                    example: 98.68
 
     CreateUserDto:
       type: object

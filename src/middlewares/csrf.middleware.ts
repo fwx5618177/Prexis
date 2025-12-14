@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction, RequestHandler } from 'express'
 import { randomBytes } from 'crypto'
-import { CSRF_ENABLED } from '@/config'
+import { CSRF_ENABLED, isProd } from '@/config'
 
 const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
 const CSRF_HEADER_NAME = 'X-XSRF-TOKEN'
@@ -36,7 +36,7 @@ export function csrfProtection(): RequestHandler {
         const token = generateToken()
         res.cookie(CSRF_COOKIE_NAME, token, {
           httpOnly: false, // 允许 JS 读取
-          secure: process.env.NODE_ENV === 'production',
+          secure: isProd(),
           sameSite: 'strict',
           maxAge: 24 * 60 * 60 * 1000, // 24 小时
         })
@@ -79,7 +79,7 @@ export function csrfTokenHandler(req: Request, res: Response): void {
     token = generateToken()
     res.cookie(CSRF_COOKIE_NAME, token, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProd(),
       sameSite: 'strict',
       maxAge: 24 * 60 * 60 * 1000,
     })

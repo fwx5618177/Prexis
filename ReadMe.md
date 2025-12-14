@@ -13,19 +13,35 @@ A production-ready Node.js API framework built with TypeScript, Express, and Pri
 - 📊 **GraphQL + REST** - Dual protocol support
 - 🔒 **Security** - Helmet, CORS, HPP, JWT authentication
 - 📝 **Auto API Docs** - Swagger UI
-- ✅ **Testing** - Vitest with 100+ unit tests
-- 📈 **Performance** - 8K+ RPS with single process
+- ✅ **Testing** - Vitest with 200+ unit tests
+- 📈 **High Performance** - 27,600+ RPS (PM2 cluster mode)
+- ⚡ **Circuit Breaker** - Enterprise-level fault tolerance with opossum
+
+## 📊 Performance Benchmarks
+
+> Real benchmark data collected on MacBook Pro (14-core Apple Silicon)
+
+| Mode | Avg RPS | Max RPS | Avg Latency | p99 Latency | Improvement |
+|------|---------|---------|-------------|-------------|-------------|
+| Single Process | 8,570 | 8,879 | 5.33ms | 9ms | Baseline |
+| PM2 Cluster (14 cores) | **27,608** | **33,983** | **1.34ms** | 15ms | **3.2x** |
+
+**Test Configuration:**
+- Tool: `autocannon -c 50 -d 10`
+- Endpoint: `GET /health`
+- Environment: Node.js 20+, Production mode
 
 ## 📦 Tech Stack
 
 | Category | Technology |
 |----------|------------|
-| Runtime | Node.js 20+, TypeScript 5.x |
-| Framework | Express 4.x, GraphQL |
-| ORM | Prisma 5.x |
+| Runtime | Node.js 20+, TypeScript 5.9 |
+| Framework | Express 4.22, GraphQL |
+| ORM | Prisma 6.x |
+| Resilience | opossum (Circuit Breaker) |
 | Build | SWC, pnpm |
 | Testing | Vitest |
-| Deploy | Docker, Kubernetes |
+| Deploy | Docker, Kubernetes, PM2 |
 
 ## 🚀 Quick Start
 
@@ -50,7 +66,9 @@ src/
 ├── exceptions/         # HTTP exceptions
 ├── middlewares/        # Middleware
 ├── modules/            # Business modules
+│   └── health/         # Health check with Circuit Breaker
 ├── services/           # Shared services
+│   └── circuit-breaker.service.ts
 └── shared/             # Utilities
 ```
 
@@ -70,7 +88,9 @@ pnpm typecheck        # Type check
 
 | Endpoint | Description |
 |----------|-------------|
-| `GET /health` | Health check |
+| `GET /health` | Health check (liveness) |
+| `GET /ready` | Readiness check with Circuit Breaker |
+| `GET /circuit-breaker/status` | Circuit Breaker states |
 | `GET /api-docs` | Swagger docs |
 | `POST /graphql` | GraphQL |
 | `POST /api/auth/login` | Login |

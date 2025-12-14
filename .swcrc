@@ -10,15 +10,15 @@
     },
     "target": "es2022",
     "keepClassNames": true,
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"],
-      "@config": ["config"],
-      "@types": ["types"],
-      "@modules/*": ["modules/*"],
-      "@shared/*": ["shared/*"],
-      "@services/*": ["services/*"],
-      "@protocols/*": ["protocols/*"]
+      "@/*": ["./src/*"],
+      "@config": ["./src/config"],
+      "@types": ["./src/types"],
+      "@modules/*": ["./src/modules/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@services/*": ["./src/services/*"],
+      "@protocols/*": ["./src/protocols/*"]
     }
   },
   "module": {

@@ -120,4 +120,12 @@ export class WebSocketModule {
   getConfig(): WebSocketConfig {
     return this.config
   }
+
+  /**
+   * 关闭 WebSocket 服务
+   */
+  async close(): Promise<void> {
+    await this.wsService.close()
+    WebSocketModule.instance = null
+  }
 }

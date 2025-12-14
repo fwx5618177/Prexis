@@ -3,6 +3,9 @@ logs/
 migrations/
 dist/
 
+# Development certificates (auto-generated)
+certs/
+
 *.log
 
 # Husky (auto-generated on install)

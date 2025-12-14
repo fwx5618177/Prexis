@@ -7,7 +7,7 @@ module.exports = {
   apps: [
     {
       name: 'prexis',
-      script: './dist/src/server.js',
+      script: './dist/server.js',
       instances: 'max', // 使用所有 CPU 核心
       exec_mode: 'cluster',
       autorestart: true,
@@ -16,11 +16,11 @@ module.exports = {
 
       // 环境变量
       env: {
-        NODE_ENV: 'development',
+        NODE_ENV: 'dev',
         PORT: 3000,
       },
       env_production: {
-        NODE_ENV: 'production',
+        NODE_ENV: 'prod',
         PORT: 3000,
       },
 
