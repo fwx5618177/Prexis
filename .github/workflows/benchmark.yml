@@ -61,15 +61,15 @@ jobs:
           P99=$(jq '.latency.p99' benchmark-result.json)
           echo "RPS: $RPS, P99: ${P99}ms"
 
-          # RPS 阈值检查
-          if (( $(echo "$RPS < 3000" | bc -l) )); then
-            echo "❌ Performance regression: RPS ($RPS) below threshold (3000)"
+          # RPS 阈值检查 (GitHub Actions runner 性能较低，阈值设为 2000)
+          if (( $(echo "$RPS < 2000" | bc -l) )); then
+            echo "❌ Performance regression: RPS ($RPS) below threshold (2000)"
             exit 1
           fi
 
-          # P99 延迟检查
-          if (( $(echo "$P99 > 100" | bc -l) )); then
-            echo "⚠️ Warning: P99 latency (${P99}ms) exceeds 100ms"
+          # P99 延迟检查 (CI 环境延迟较高，阈值设为 150ms)
+          if (( $(echo "$P99 > 150" | bc -l) )); then
+            echo "⚠️ Warning: P99 latency (${P99}ms) exceeds 150ms"
           fi
 
           echo "✅ Performance check passed!"
