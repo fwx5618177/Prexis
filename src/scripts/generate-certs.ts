@@ -6,8 +6,8 @@
  * 生产环境应使用 Let's Encrypt 或商业 CA 颁发的证书
  */
 
-import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs'
-import { join, dirname } from 'path'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
+import { join } from 'path'
 import { generateKeyPairSync, createSign, createHash } from 'crypto'
 
 const CERTS_DIR = join(process.cwd(), 'certs')
@@ -103,11 +103,7 @@ function encodeUTF8String(str: string): Buffer {
 }
 
 function encodeUTCTime(date: Date): Buffer {
-  const str =
-    date
-      .toISOString()
-      .replace(/[-:T]/g, '')
-      .slice(2, 14) + 'Z'
+  const str = date.toISOString().replace(/[-:T]/g, '').slice(2, 14) + 'Z'
   const buf = Buffer.from(str, 'ascii')
   return Buffer.concat([Buffer.from([0x17]), encodeLength(buf.length), buf])
 }
@@ -235,7 +231,16 @@ function createSelfSignedCertificate(): { cert: string; key: string } {
   const extensions = encodeContextTag(3, encodeSequence(Buffer.concat([basicConstraints, keyUsage, sanExtension])))
 
   const tbsCertificate = encodeSequence(
-    Buffer.concat([version, serial, signatureAlgorithm, issuerName, validity, subjectName, subjectPublicKeyInfo, extensions]),
+    Buffer.concat([
+      version,
+      serial,
+      signatureAlgorithm,
+      issuerName,
+      validity,
+      subjectName,
+      subjectPublicKeyInfo,
+      extensions,
+    ]),
   )
 
   // 签名
@@ -248,7 +253,12 @@ function createSelfSignedCertificate(): { cert: string; key: string } {
 
   // 转换为 PEM
   const certPem =
-    '-----BEGIN CERTIFICATE-----\n' + certificate.toString('base64').match(/.{1,64}/g)!.join('\n') + '\n-----END CERTIFICATE-----\n'
+    '-----BEGIN CERTIFICATE-----\n' +
+    certificate
+      .toString('base64')
+      .match(/.{1,64}/g)!
+      .join('\n') +
+    '\n-----END CERTIFICATE-----\n'
 
   console.log('✅ Certificate generated successfully')
   console.log(`   📁 Certificate: ${CERT_FILE}`)

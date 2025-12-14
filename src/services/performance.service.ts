@@ -31,10 +31,7 @@ export interface PerformanceConfig {
 /**
  * 应用高性能优化
  */
-export function applyPerformanceOptimizations(
-  app: Application,
-  config: PerformanceConfig = {},
-): void {
+export function applyPerformanceOptimizations(app: Application, config: PerformanceConfig = {}): void {
   // 禁用 X-Powered-By (减少响应头大小)
   if (config.disableXPoweredBy !== false) {
     app.disable('x-powered-by')
@@ -178,10 +175,7 @@ export interface ClusterConfig {
  * })
  * ```
  */
-export function startWithCluster(
-  startApp: () => void | Promise<void>,
-  config: ClusterConfig = {},
-): void {
+export function startWithCluster(startApp: () => void | Promise<void>, config: ClusterConfig = {}): void {
   const numWorkers = config.workers ?? cpus().length
   const autoRestart = config.autoRestart ?? true
   const restartDelay = config.restartDelay ?? 1000

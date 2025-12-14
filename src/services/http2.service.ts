@@ -7,8 +7,7 @@
 
 import http2, { Http2SecureServer, ServerHttp2Stream } from 'http2'
 import { readFileSync, existsSync } from 'fs'
-import express, { Application } from 'express'
-import http2Express from 'http2-express-bridge'
+import { Application } from 'express'
 import { logger } from '@/utils/loggers'
 
 /**
@@ -133,40 +132,35 @@ export class Http2Server {
         return
       }
 
-      stream.pushStream(
-        { ':path': resource.path },
-        (err: Error | null, pushStream: ServerHttp2Stream) => {
-          if (err) {
-            logger.error('Push stream error:', err)
+      stream.pushStream({ ':path': resource.path }, (err: Error | null, pushStream: ServerHttp2Stream) => {
+        if (err) {
+          logger.error('Push stream error:', err)
+          return
+        }
+
+        let content: Buffer
+
+        if (resource.isFilePath && typeof resource.content === 'string') {
+          try {
+            content = readFileSync(resource.content)
+          } catch {
+            logger.error(`Failed to read push resource: ${resource.content}`)
+            pushStream.close()
             return
           }
+        } else {
+          content = Buffer.isBuffer(resource.content) ? resource.content : Buffer.from(resource.content)
+        }
 
-          let content: Buffer
+        pushStream.respond({
+          ':status': 200,
+          'content-type': resource.contentType,
+          'content-length': content.length,
+        })
 
-          if (resource.isFilePath && typeof resource.content === 'string') {
-            try {
-              content = readFileSync(resource.content)
-            } catch {
-              logger.error(`Failed to read push resource: ${resource.content}`)
-              pushStream.close()
-              return
-            }
-          } else {
-            content = Buffer.isBuffer(resource.content)
-              ? resource.content
-              : Buffer.from(resource.content)
-          }
-
-          pushStream.respond({
-            ':status': 200,
-            'content-type': resource.contentType,
-            'content-length': content.length,
-          })
-
-          pushStream.end(content)
-          logger.debug(`Pushed: ${resource.path}`)
-        },
-      )
+        pushStream.end(content)
+        logger.debug(`Pushed: ${resource.path}`)
+      })
     }
   }
 
